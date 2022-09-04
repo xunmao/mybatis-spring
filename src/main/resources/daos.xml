@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+  <!-- 
+    根据官方文档，配置一个 DataSource Bean （此项目使用 Spring 提供的 DriverManagerDataSource 实现）。
+    https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#jdbc-datasource
+   -->
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="${jdbc.driverClassName}" />
+    <property name="url" value="${jdbc.url}" />
+    <property name="username" value="${jdbc.username}" />
+    <property name="password" value="${jdbc.password}" />
+  </bean>
+  <!-- 
+    根据官方文档，配置属性文件。
+    https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#xsd-schemas-context
+   -->
+  <context:property-placeholder location="jdbc.properties" />
+
+  <!-- 
+    根据官方文档，配置一个 SqlSessionFactory Bean。
+    https://mybatis.org/spring/zh/factorybean.html
+
+    1. SqlSessionFactory 有一个唯一的必要属性：用于 JDBC 的 DataSource。
+    这可以是任意的 DataSource 对象，它的配置方法和其它 Spring 数据库连接是一样的。
+
+    2. 一个常用的属性是 configLocation，它用来指定 MyBatis 的 XML 配置文件路径。
+    它在需要修改 MyBatis 的基础配置非常有用。通常，基础配置指的是 <settings> 或 <typeAliases> 元素。
+   -->
+  <!-- 
+    Caused by: java.lang.ClassNotFoundException: org.apache.ibatis.session.SqlSessionFactory
+   -->
+  <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource" />
+    <!-- 
+      1. 下面这个配置文件并不需要是一个完整的 MyBatis 配置。
+      确切地说，任何环境配置（<environments>），数据源（<DataSource>）和 MyBatis 的事务管理器（<transactionManager>）都会被忽略。
+      SqlSessionFactoryBean 会创建它自有的 MyBatis 环境配置（Environment），并按要求设置自定义环境的值。
+
+      2. 如果 MyBatis 在映射器类对应的路径下找不到与之相对应的映射器 XML 文件，那么也需要配置文件。
+      这时有两种解决办法：
+        第一种是手动在 MyBatis 的 XML 配置文件中的 <mappers> 部分中指定 XML 文件的类路径；
+        第二种是设置工厂 bean 的 mapperLocations 属性。
+
+      3. 使用 value="classpath*:com/xunmao/demo/dao/mybatis-config.xml" 时，无法找到资源，
+      但是，使用 value="classpath:com/xunmao/demo/dao/mybatis-config.xml" 时，就可以找到资源。
+      classpath 后面的 * 代表什么含义（这是一个 Ant 风格的字符串）
+     -->
+    <property name="configLocation" value="classpath:com/xunmao/demo/dao/mybatis-config.xml" />
+  </bean>
+
+  <!-- 
+    根据官方文档，配置一个 Mapper Bean。
+    https://mybatis.org/spring/zh/mappers.html#register
+   -->
+  <bean id="actorMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+    <property name="mapperInterface" value="com.xunmao.demo.dao.ActorMapper" />
+    <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+  </bean>
+</beans>
