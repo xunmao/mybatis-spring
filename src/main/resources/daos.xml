@@ -61,4 +61,9 @@
     <property name="mapperInterface" value="com.xunmao.demo.dao.ActorMapper" />
     <property name="sqlSessionFactory" ref="sqlSessionFactory" />
   </bean>
+
+  <bean id="inventoryMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+    <property name="mapperInterface" value="com.xunmao.demo.dao.InventoryMapper" />
+    <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+  </bean>
 </beans>
