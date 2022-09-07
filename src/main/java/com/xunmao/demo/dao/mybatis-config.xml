@@ -19,6 +19,10 @@
     <setting name="logImpl" value="LOG4J2" />
   </settings>
 
+  <typeAliases>
+    <package name="com.xunmao.demo.pojo" />
+  </typeAliases>
+
   <!-- 
     使用 MyBatis Spring 框架时，任何环境配置（<environments>），数据源（<DataSource>）
     和 MyBatis 的事务管理器（<transactionManager>）都会被忽略。因此，可以删除以下配置。
@@ -37,7 +41,7 @@
   -->
 
   <mappers>
-    <mapper resource="com/xunmao/demo/dao/ActorMapper.xml" />
+    <package name="com.xunmao.demo.dao" />
   </mappers>
 
 </configuration>
