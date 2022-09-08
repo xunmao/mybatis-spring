@@ -18,5 +18,6 @@ public class RentalMapperTest {
         parameterMap.put("customerId", 3);
         parameterMap.put("staffId", 1);
         rentalMapper.addRentalWithMap(parameterMap);
+        System.out.println("rentalId: " + parameterMap.get("rentalId"));
     }
 }

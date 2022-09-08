@@ -6,4 +6,10 @@
   <bean id="actorService" class="com.xunmao.demo.service.impl.ActorServiceImpl">
     <property name="actorMapper" ref="actorMapper" />
   </bean>
+
+  <bean id="rentalService" class="com.xunmao.demo.service.impl.RentalServiceImpl">
+    <property name="inventoryMapper" ref="inventoryMapper" />
+    <property name="rentalMapper" ref="rentalMapper" />
+    <property name="paymentMapper" ref="paymentMapper" />
+  </bean>
 </beans>

@@ -71,4 +71,9 @@
     <property name="mapperInterface" value="com.xunmao.demo.dao.RentalMapper" />
     <property name="sqlSessionFactory" ref="sqlSessionFactory" />
   </bean>
+
+  <bean id="paymentMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+    <property name="mapperInterface" value="com.xunmao.demo.dao.PaymentMapper" />
+    <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+  </bean>
 </beans>
