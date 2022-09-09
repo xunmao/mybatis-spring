@@ -133,6 +133,112 @@ https://github.com/xunmao/mybatis
 2. 创建 ActorMapper 类（映射器）
 3. 创建测试类
 
+## 实现租赁 DVD 服务
+
+租赁 DVD 服务是 sakila 示例数据库中的一个业务，其业务逻辑如下：
+
+1. 查询某张 DVD 的库存
+
+```
+mysql> SELECT inventory_in_stock(10);
++------------------------+
+| inventory_in_stock(10) |
++------------------------+
+|                      1 |
++------------------------+
+1 row in set (0.01 sec)
+```
+
+2. 添加一条租赁记录（向 rental 表中插入记录）
+
+```
+mysql> INSERT INTO rental(rental_date, inventory_id, customer_id, staff_id) 
+           VALUES(NOW(), 10, 3, 1);
+Query OK, 1 row affected (0.00 sec)
+```
+
+3. 获取租赁记录的主键（自增主键）以及顾客的费用
+
+```
+mysql> SET @rentID = LAST_INSERT_ID(),
+                  @balance = get_customer_balance(3, NOW());
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> SELECT @rentID, @balance;
++---------+----------+
+| @rentID | @balance |
++---------+----------+
+|   16050 |     4.99 |
++---------+----------+
+1 row in set (0.00 sec)
+```
+
+4. 添加一条支付记录（向 payment 表中插入记录）
+
+```
+mysql> INSERT INTO payment (customer_id, staff_id, rental_id, amount,  payment_date)
+           VALUES(3, 1, @rentID, @balance, NOW());
+Query OK, 1 row affected (0.00 sec)
+```
+
+### 创建并测试 InventoryMapper 类（映射器）
+
+查询某张 DVD 的库存时，可以通过示例数据库中的函数 inventory_in_stock()。  
+调用此函数只需要一个参数，并且结果集只有一个数字，因此可以暂时省略 POJO 类。
+
+1. 创建 InventoryMapper 类（映射器）
+1. 创建测试类
+
+### 创建并测试 Rental 类（POJO）及其映射器
+
+1. 创建 Rental 类（POJO）
+2. 创建 RentalMapper 类（映射器）
+3. 创建测试类
+
+需要注意自增主键的获取方式：
+
+```xml
+<insert id="addRentalWithMap" useGeneratedKeys="true" keyProperty="rentalId" keyColumn="rental_id">
+  INSERT INTO
+      rental (rental_date, inventory_id, customer_id, staff_id)
+  VALUES
+      (
+          NOW(), #{inventoryId}, #{customerId}, #{staffId}
+      )
+  <selectKey keyProperty="rentalId" resultType="int" order="AFTER">
+    SELECT LAST_INSERT_ID()
+  </selectKey>
+</insert>
+```
+
+### 创建并测试 Payment 类（POJO）及其映射器
+
+1. 创建 Payment 类（POJO）
+2. 创建 PaymentMapper 类（映射器）
+3. 创建测试类
+
+在此映射器中，实现获取顾客的费用处理和添加支付记录处理。
+
+```xml
+<!-- 获取顾客的费用 -->
+<select id="getCustomerBalance" resultType="decimal">
+  SELECT get_customer_balance(#{customerId}, NOW())
+</select>
+
+<!-- 添加支付记录 -->
+<insert id="addPaymentWithMap" useGeneratedKeys="true" keyProperty="paymentId" keyColumn="payment_id">
+  INSERT INTO
+      payment (customer_id, staff_id, rental_id, amount, payment_date)
+  VALUES
+      (
+          #{customerId}, #{staffId}, #{rentalId}, #{amount}, NOW()
+      )
+  <selectKey keyProperty="paymentId" resultType="int" order="AFTER">
+    SELECT LAST_INSERT_ID()
+  </selectKey>
+</insert>
+```
+
 ## 其他
 
 ### 使用 Log4j 2 日志工厂
