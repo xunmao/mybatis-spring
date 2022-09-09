@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xunmao.demo.dao.RentalMapper">
 
+  <!-- 
+    https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#insert-update-和-delete
+    如果你的数据库支持自动生成主键的字段（比如 MySQL 和 SQL Server），那么你可以设置 useGeneratedKeys=”true”，
+    然后再把 keyProperty 设置为目标属性就 OK 了。之后，通过 rentalId 就可以取出主键的值。
+   -->
   <insert id="addRentalWithMap" useGeneratedKeys="true" keyProperty="rentalId" keyColumn="rental_id">
     INSERT INTO
         rental (rental_date, inventory_id, customer_id, staff_id)
@@ -9,9 +14,6 @@
         (
             NOW(), #{inventoryId}, #{customerId}, #{staffId}
         )
-    <selectKey keyProperty="rentalId" resultType="int" order="AFTER">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
   </insert>
 
 </mapper>
