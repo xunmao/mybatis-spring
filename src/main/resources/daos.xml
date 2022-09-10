@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation="
-        http://www.springframework.org/schema/beans
-        https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context
-        https://www.springframework.org/schema/context/spring-context.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop" xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
   <!-- 
     根据官方文档，配置一个 DataSource Bean （此项目使用 Spring 提供的 DriverManagerDataSource 实现）。
@@ -76,4 +76,24 @@
     <property name="mapperInterface" value="com.xunmao.demo.dao.PaymentMapper" />
     <property name="sqlSessionFactory" ref="sqlSessionFactory" />
   </bean>
+
+  <!-- 
+    要开启 Spring 的事务处理功能，在 Spring 的配置文件中创建一个 DataSourceTransactionManager 对象
+      https://mybatis.org/spring/zh/transactions.html
+
+    使用 Spring 的声明式事物管理
+      https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#transaction-declarative
+   -->
+  <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource" />
+  </bean>
+  <tx:advice id="txAdvice" transaction-manager="txManager">
+    <tx:attributes>
+      <tx:method name="*" />
+    </tx:attributes>
+  </tx:advice>
+  <aop:config>
+    <aop:pointcut id="rentalServiceOperation" expression="execution(* com.xunmao.demo.service.impl.RentalServiceImpl.*(..))" />
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="rentalServiceOperation" />
+  </aop:config>
 </beans>

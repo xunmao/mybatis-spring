@@ -253,6 +253,63 @@ Query OK, 1 row affected (0.00 sec)
 </insert>
 ```
 
+## 使用 MyBatis Spring 的事务管理
+
+> 一个使用 MyBatis-Spring 的主要原因是它允许 MyBatis 参与到 Spring 的事务管理中。  
+> 而不是给 MyBatis 创建一个新的专用事务管理器，MyBatis-Spring 借助了 Spring 中的 `DataSourceTransactionManager` 来实现事务管理。
+
+Spring 中的事务管理分为两类：
+
+- 一类是声明式的事务管理，只需要在配置文件中声明相关的配置；
+- 另一类是编程式的事务管理，需要在相关的处理中加入事务管理的代码（例如，提交或者回滚）。
+
+此项目将使用声明式的事务管理。  
+
+声明式的事务管理基于 AOP 的配置。实际上就是通过一些配置，告诉 Spring 生成动态代理，用添加了事务管理功能对象，动态代理我们的实际业务对象。
+
+### 导入依赖
+
+```xml
+<dependency>
+  <groupId>org.aspectj</groupId>
+  <artifactId>aspectjweaver</artifactId>
+  <version>1.9.9.1</version>
+</dependency>
+```
+
+### 添加事务管理器
+
+```xml
+<!-- 
+  要开启 Spring 的事务处理功能，在 Spring 的配置文件中创建一个 DataSourceTransactionManager 对象
+    https://mybatis.org/spring/zh/transactions.html
+  使用 Spring 的声明式事物管理
+    https://docs.spring.io/spring-framework/docs/current/reference/html/data-access.html#transaction-declarative
+ -->
+<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+  <property name="dataSource" ref="dataSource" />
+</bean>
+```
+
+### 添加事务管理对象
+
+```xml
+<tx:advice id="txAdvice" transaction-manager="txManager">
+  <tx:attributes>
+    <tx:method name="*" />
+  </tx:attributes>
+</tx:advice>
+```
+
+### 添加 AOP 配置
+
+```xml
+<aop:config>
+  <aop:pointcut id="rentalServiceOperation" expression="execution(* com.xunmao.demo.service.impl.RentalServiceImpl.*(..))" />
+  <aop:advisor advice-ref="txAdvice" pointcut-ref="rentalServiceOperation" />
+</aop:config>
+```
+
 ## 其他
 
 ### 使用 Log4j 2 日志工厂
