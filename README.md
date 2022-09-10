@@ -115,6 +115,8 @@ mvn archetype:generate -DgroupId=com.xunmao.demo -DartifactId=mybatis-spring -Da
 
 ### 配置 MyBatis
 
+TODO
+
 ## 第一个映射器（Mapper）
 
 ### 创建 MyBatis 工具类
@@ -198,14 +200,26 @@ Query OK, 1 row affected (0.00 sec)
 需要注意自增主键的获取方式：
 
 ```xml
-<insert id="addRentalWithMap" useGeneratedKeys="true" keyProperty="rentalId" keyColumn="rental_id">
+<!-- 
+  https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#insert-update-和-delete
+  rental 表使用了自增主键，参考官方文档，设置 useGeneratedKeys=”true”，
+  然后把 keyProperty 设置为目标属性，之后，通过 rentalId 就可以取出主键的值。
+  
+  注意：虽然，取出的主键值可以放入 Map<String, Integer> 类型的 Map 中，
+  但是，主键（rentalId）被取出后的默认类型为 BigInteger ，不能进行常规的类型转换：
+  Integer rentalId = rentalMap.get("rentalId"); // 将抛出类型转换异常
+ -->
+<insert id="addRentalWithMap" useGeneratedKeys="true">
   INSERT INTO
       rental (rental_date, inventory_id, customer_id, staff_id)
   VALUES
       (
           NOW(), #{inventoryId}, #{customerId}, #{staffId}
       )
-  <selectKey keyProperty="rentalId" resultType="int" order="AFTER">
+  <!-- 
+    可以在这里添加 selectKey 元素，显式地控制 rentalId 的结果集类型。
+   -->
+  <selectKey keyProperty="rentalId" keyColumn="rental_id" resultType="int" order="AFTER">
     SELECT LAST_INSERT_ID()
   </selectKey>
 </insert>
@@ -226,14 +240,14 @@ Query OK, 1 row affected (0.00 sec)
 </select>
 
 <!-- 添加支付记录 -->
-<insert id="addPaymentWithMap" useGeneratedKeys="true" keyProperty="paymentId" keyColumn="payment_id">
+<insert id="addPaymentWithMap" useGeneratedKeys="true">
   INSERT INTO
       payment (customer_id, staff_id, rental_id, amount, payment_date)
   VALUES
       (
           #{customerId}, #{staffId}, #{rentalId}, #{amount}, NOW()
       )
-  <selectKey keyProperty="paymentId" resultType="int" order="AFTER">
+  <selectKey keyProperty="paymentId" keyColumn="payment_id" resultType="int" order="AFTER">
     SELECT LAST_INSERT_ID()
   </selectKey>
 </insert>

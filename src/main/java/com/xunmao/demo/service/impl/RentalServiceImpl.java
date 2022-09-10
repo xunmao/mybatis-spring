@@ -33,7 +33,6 @@ public class RentalServiceImpl implements RentalService {
         int inventoryInStock = inventoryMapper.findInventoryInStock(parameterMap.get("inventoryId"));
         System.out.println("inventoryInStock: " + inventoryInStock);
         if (inventoryInStock == 0) {
-            System.out.println("inventoryInStock: 0");
             return;
         }
 
